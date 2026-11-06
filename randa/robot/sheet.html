@@ -130,7 +130,7 @@ body { margin: 0; background: #d9d7e6; color: #1b1740; font-family: var(--body);
     <label>المادة والصف<input id="subject" type="text" value="التقنية الرقمية • الصف الأول الثانوي"></label>
     <label>عنوان الدرس<input id="lesson" type="text" value="الذكاء الاصطناعي"></label>
     <label>العنوان الفرعي<input id="lessonSub" type="text" value="حين تتعلّم الآلة"></label>
-    <label>المعلمة<input id="teacher" type="text" value="رنده البلوي"></label>
+    <label>المعلمة<input id="teacher" type="text" value="رندا البلوي"></label>
   </div>
   <button id="printBtn" type="button">اطبعي الورقة</button>
 </section>
@@ -210,7 +210,7 @@ async function drawTitle(text) {
   }));
   pts.forEach(([x, y]) => { ctx.fillStyle = "rgba(200,190,255,.6)"; ctx.beginPath(); ctx.arc(x, y, 1.6, 0, 7); ctx.fill(); });
 })();
-$("url").value = guessURL();
+$("url").value = guessURL() || "https://teachervz.github.io/interactive-ai-01/randa/robot";
 $("url").addEventListener("input", drawQR);
 ["school", "subject", "lesson", "lessonSub", "teacher"].forEach((id) => $(id).addEventListener("input", syncText));
 $("printBtn").addEventListener("click", () => window.print());
