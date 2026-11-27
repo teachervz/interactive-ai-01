@@ -191,6 +191,18 @@ textarea:disabled{opacity:.8}
 @keyframes floaty{50%{transform:translateY(-12px)}}
 .enter{animation:pop .45s}
 
+/* ---------- 🧪 المختبر ---------- */
+.lab-hands{display:flex;justify-content:center;gap:14px;margin:6px 0 18px}
+.lab-hands span{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:58px;background:var(--pss);border:3px solid var(--line);border-radius:24px;padding:12px 22px}
+.lab-hands b{font-size:19px;color:var(--pd)}
+.lab-steps{margin:0 0 18px;padding-inline-start:28px;display:flex;flex-direction:column;gap:8px;font-size:20px;font-weight:800;line-height:1.5}
+#labGo{width:100%}
+#labModal{position:fixed;inset:0;z-index:60;display:none;flex-direction:column;background:#1a1145}
+#labModal.show{display:flex}
+.lab-bar{flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;padding-top:max(10px,env(safe-area-inset-top));background:#120b33;color:#fff;font-size:18px}
+.lab-bar button{font-size:18px;font-weight:900;border-radius:14px;padding:10px 20px;background:#F59E0B;color:#2E1065}
+#labModal iframe{flex:1;min-height:0;width:100%;border:0;background:#fff}
+
 @media (max-width:640px){
   .opts,.picks{grid-template-columns:1fr}
   .teams{grid-template-columns:repeat(2,1fr)}
@@ -312,6 +324,7 @@ function emptyDraft(t){
     case 'order': case 'pick': return [];
     case 'sort': case 'tf': return {};
     case 'text': case 'ideas': return '';
+    case 'lab': return null;
   }
   return null;
 }
@@ -359,7 +372,7 @@ function render(){
   const lockBar = R ? `<div class="locked">🔒 كشفت المعلمة الإجابة${g?`<span class="score">${g.ok} / ${g.total}</span>`:''}</div>` : '';
   const mine = t.perTeam ? `<div class="mytask">🎯 مهمة مجموعتكِ: ${t.perTeam[team] || 'مهمة حرة تحددها المعلمة'}</div>` : '';
   const ctx = t.context ? `<div class="ctx">${t.context.map(c => `<span>${c}</span>`).join('')}</div>` : '';
-  const needSend = !['rate', 'ideas'].includes(t.kind);
+  const needSend = !['rate', 'ideas', 'lab'].includes(t.kind);
   // بعد الكشف نعرض الإجابة المُرسلة فعلًا (لا المسودة غير المرسلة)
   const d = R ? (st.sent && st.sent.v != null ? mergeDraft(t, st.sent.v) : emptyDraft(t)) : st.draft;
   const lockT = st.timeUp && !R;
@@ -369,7 +382,7 @@ function render(){
       <h1 class="title">${titleOf(s)}</h1>
       ${t.q && !t.perTeam ? `<div class="q">${t.q}</div>` : ''}${mine}${ctx}
       <div id="body">${BODY[t.kind] ? BODY[t.kind](t, d, R) : ''}</div>
-      ${R && t.model ? `<div class="model">💡 ${t.model}</div>` : ''}
+      ${R && t.model ? `<div class="model">💡 ${t.model}</div>` : (R && !LIVE.grade(t, []) && !(t.items || []).some(x => x.a) && !['rate','lab'].includes(t.kind) ? `<div class="model">💬 لا توجد إجابة واحدة صحيحة — ناقشن إجاباتكنّ مع المعلمة والصف</div>` : '')}
       <div class="foot">${needSend && !R && !lockT ? `<button class="send" id="send">📤 إرسال الإجابة</button>` : ''}<div class="status" id="status"></div></div>
     </div>`;
   BIND[t.kind] && BIND[t.kind](t, R || lockT);
@@ -379,6 +392,7 @@ function render(){
 
 function updateFoot(){
   const stEl = $('#status'), send = $('#send'), t = st.task; if (!stEl || !t) return;
+  if (t.kind === 'lab') { stEl.className = 'status'; stEl.textContent = ''; return; }
   if (t.kind === 'ideas') { stEl.className = 'status'; stEl.textContent = st.ideas.length ? `أرسلتنّ ${st.ideas.length} فكرة 💡` : ''; return; }
   if (st.timeUp && !st.revealed) {
     stEl.className = 'status ' + (st.sent ? 'ok' : 'bad');
@@ -463,6 +477,11 @@ const BODY = {
         <button class="rb ${v===false?'sel':''}" data-i="${i}" data-v="0" style="--c:var(--bad)" ${R?'disabled':''}>✖ خطأ</button></div>
         ${R && it.why ? `<div class="why">${it.why}</div>` : ''}</div>`; }).join('')}</div>`,
 
+  lab: t => `<div class="lab-hands"><span>✊<b>حجر</b></span><span>✋<b>ورقة</b></span><span>✌️<b>مقص</b></span></div>
+      <ol class="lab-steps"><li>شغّلي الكاميرا واسمحي لها</li><li>علّمي الآلة كل حركة بزر «علّميها» وأنتِ تؤدينها أمام الكاميرا</li><li>العبي ضد الآلة 🎮</li></ol>
+      <button class="send" id="labGo">🧪 ابدئي المختبر</button>
+      <div class="hint" style="text-align:center">تحتاجين إنترنت • بعد الانتهاء اضغطي «↩️ رجوع» للعودة للعرض</div>`,
+
   ideas: (t, d, R) => `${R ? '' : `<div class="idea-in"><input id="ideaIn" maxlength="28" placeholder="اكتبي فكرة واحدة…" autocomplete="off"><button id="ideaSend">＋ إرسال</button></div>
       <div class="hint">كل فكرة تظهر مباشرة على شاشة المعلمة بلون مجموعتكنّ ✨</div>`}<div class="ideas" id="ideas"></div>`
 };
@@ -488,6 +507,7 @@ const BIND = {
     st.draft[b.dataset.i] = b.dataset.b; $$(`.rb[data-i="${b.dataset.i}"]`).forEach(o => o.classList.toggle('sel', o === b)); }); },
   tf: (t, R) => { if (R) return; $$('.rb').forEach(b => b.onclick = () => {
     st.draft[b.dataset.i] = b.dataset.v === '1'; $$(`.rb[data-i="${b.dataset.i}"]`).forEach(o => o.classList.toggle('sel', o === b)); }); },
+  lab: t => { $('#labGo').onclick = () => openLab(t.file); },
   ideas: (t, R) => {
     drawIdeas(); if (R) return;
     const inp = $('#ideaIn'), go = () => {
@@ -530,13 +550,27 @@ function rain(n = 26){
 }
 function cheer(){
   const t = st.task, a = st.sent, g = a ? LIVE.grade(t, a.v) : null;
-  if (t.kind === 'rate' || t.kind === 'ideas') return;
+  if (t.kind === 'rate' || t.kind === 'ideas' || t.kind === 'lab') return;
   if (!a) return showFx('⏳', 'لم ترسلن إجابة هذه المرة', 'السؤال القادم لكنّ 💪');
-  if (!g) return showFx('✅', 'كشفت المعلمة الإجابة', 'قارنّ إجابتكنّ بالإجابة النموذجية 👇');
+  if (!g) return showFx('✅', 'كشفت المعلمة الإجابة', (t.model || (t.items || []).some(x => x.a)) ? 'قارنّ إجابتكنّ بالإجابة النموذجية 👇' : 'ناقشن إجاباتكنّ مع المعلمة 💬');
   if (g.ok === g.total) { showFx('🎉', 'إجابة صحيحة!', `أحسنتنّ يا مجموعة ${T[team].name} ${T[team].icon}`); rain(); }
   else if (g.ok > 0) showFx('👏', `${g.ok} من ${g.total} صحيحة`, 'قريبات جدًا… ركّزن في التالي!');
   else showFx('💪', 'لا بأس!', 'راجعن الإجابة الصحيحة… والسؤال القادم لكنّ');
 }
+
+/* 🧪 المختبر على الآيباد: يُفتح فوق الصفحة، والرجوع يحذف الإطار فتتوقف الكاميرا */
+function openLab(file){
+  let m = $('#labModal');
+  if (!m) {
+    m = document.createElement('div'); m.id = 'labModal';
+    m.innerHTML = '<div class="lab-bar"><b>🧪 مختبر حجر ورقة مقص</b><button id="labBack">↩️ رجوع</button></div>';
+    document.body.appendChild(m);
+    $('#labBack').onclick = closeLab;
+  }
+  const f = document.createElement('iframe'); f.title = 'مختبر حجر ورقة مقص'; f.allow = 'camera *; microphone *'; f.src = file;
+  m.appendChild(f); m.classList.add('show'); document.body.style.overflow = 'hidden';
+}
+function closeLab(){ const m = $('#labModal'); if (!m) return; const f = $('iframe', m); if (f) f.remove(); m.classList.remove('show'); document.body.style.overflow = ''; }
 
 function drawIdeas(){ const box = $('#ideas'); if (box) box.innerHTML = st.ideas.map(x => `<span>${esc(x)}</span>`).join(''); updateFoot(); }
 
@@ -551,8 +585,7 @@ if (!LIVE.ok) {
   LIVE.ready.then(() => {
     if (LIVE.authError) { screen('⚠️', 'تعذّر الدخول', 'فعّلي خيار <b>Anonymous</b> في Firebase ← Authentication ← Sign-in method'); return; }
     LIVE.onConn(c => { const el = $('#hConn'); el.classList.toggle('on', c); el.textContent = c ? 'متصل' : 'غير متصل'; });
-    const code = LIVE.room || store.get('room');
-    code ? openRoom(code) : renderCode();
+    renderCode();   // دائمًا: رمز الفصل أولًا ثم اختيار المجموعة
   });
 }
 
@@ -579,14 +612,14 @@ async function openRoom(code){
   try { name = await LIVE.teacherName(code); } catch(e) {}
   if (!name) { store.set('room', null); return renderCode('رمز الفصل غير صحيح، تأكدي منه'); }
   teacher = name; LIVE.setRoom(code); store.set('room', code);
-  const t = store.get(KEY()); team = t !== null && T[+t] ? +t : null;
+  team = null;
   const pres = LIVE.ref('presence'), presFn = s => {
     const v = s.val() || {}; presence = {};
     Object.keys(v).forEach(k => presence[k] = Object.keys(v[k] || {}).length);
     if (team === null && $('.teams')) renderJoin();
   };
   pres.on('value', presFn); roomOff = () => pres.off('value', presFn);
-  team === null ? renderJoin() : enterTeam();
+  renderJoin();
 }
 function stopRoom(){ if (roomOff) roomOff(); roomOff = null; presence = {}; }
 </script>

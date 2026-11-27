@@ -402,6 +402,7 @@ body.idle #hint{opacity:0}
 .grp:hover{transform:translateY(-5px)}
 .grp .gi{font-size:64px}
 .grp h3{font-size:36px;margin:4px 0 10px}
+.grp .gteam{font-size:24px;font-weight:800;background:rgba(255,255,255,.22);border-radius:999px;padding:2px 18px;margin:-4px 0 10px}
 .grp .peek-q{font-size:24px;opacity:.85;margin-top:auto;margin-bottom:auto}
 .grp .peek-a{font-size:24px;line-height:1.55;font-weight:700;background:rgba(255,255,255,.18);border-radius:18px;padding:12px}
 .fact{background:var(--mint-l);border-radius:26px;padding:16px 28px;font-size:29px;font-weight:700;line-height:1.55;border-right:10px solid var(--mint)}
@@ -855,7 +856,7 @@ body.live-on #live{transform:none}
 <!-- 📡 لوحة إجابات المجموعات المباشرة -->
 <aside id="live">
   <div class="lv-head">
-    <div class="lv-title">📡 إجابات المجموعات <span id="lvCount">0/5</span></div>
+    <div class="lv-title">📡 إجابات المجموعات <span id="lvCount">0/4</span></div>
     <button id="lvEye" title="إخفاء/إظهار الإجابات عن الفصل حتى الكشف">👁</button>
     <button id="lvHide" title="إغلاق اللوحة">✕</button>
   </div>
@@ -1068,7 +1069,7 @@ const T = {
         <p class="sub st">${LESSON.subtitle}</p>
         <div class="meta st"><span>👩‍🏫 ${LESSON.teacher}</span><span>📅 ${new Date().toLocaleDateString('ar-SA',{weekday:'long',day:'numeric',month:'long'})}</span></div>
         <button class="btn st say">🔊 استمعي.. الحاسب يرحّب بكنّ</button>
-        <div><div class="join-code" id="joinCode" hidden><span class="jc-t">📱 رمز الفصل على الآيباد<b></b><small>أو امسحن الرمز بالكاميرا</small></span><i class="jc-qr"></i></div></div>
+        <div><div class="join-code" id="joinCode" hidden><span class="jc-t">📱 رمز الفصل على الآيباد<b></b><small>امسحن الرمز بالكاميرا ثم اكتبن رمز الفصل</small></span><i class="jc-qr"></i></div></div>
       </div>
       <div class="orbit-wrap st">
         <div class="orbit-ring">${['💬','👁️','🚗','🎮','🩺','🌐','🦾','🎙️'].map((e,i)=>{const a=i/8*2*Math.PI;return `<span style="left:${50+50*Math.cos(a)}%;top:${50+50*Math.sin(a)}%">${e}</span>`}).join('')}</div>
@@ -1573,7 +1574,7 @@ const T = {
       <div class="row" style="align-items:center">
         <div class="task st" style="flex:1">${s.task}</div>
         <div class="st">${timerHTML(s.seconds,'',true)}</div></div>
-      <div class="groups">${s.groups.map(g=>`<div class="grp peek st" style="background:${g.c}"><div class="gi">${g.i}</div><h3>${g.t}</h3><div class="peek-q">👆 اضغطي بعد النقاش<br>لرؤية إجابة الكتاب</div><div class="peek-a">${g.a}</div></div>`).join('')}</div>
+      <div class="groups" style="grid-template-columns:repeat(${s.groups.length},1fr)">${s.groups.map((g,k)=>`<div class="grp peek st" style="background:${g.c}"><div class="gi">${g.i}</div><h3>${g.t}</h3>${LESSON.teams&&LESSON.teams[k]?`<div class="gteam">${LESSON.teams[k].icon} ${LESSON.teams[k].name}</div>`:''}<div class="peek-q">👆 اضغطي بعد النقاش<br>لرؤية إجابة الكتاب</div><div class="peek-a">${g.a}</div></div>`).join('')}</div>
       <div class="fact st">${s.fact}</div></div>`,
     init:(el,s,ctx)=>mountTimer($('.timer',el), ctx)
   },
@@ -1930,9 +1931,11 @@ const Live = (() => {
     const T=TEAMS, kind=task&&task.kind, graded=GRADED.includes(kind), masked=hide&&!revealed;
     $('.lv-actions').style.display=task?'':'none';
     $('#lvEye').textContent=hide?'🙈':'👁';
-    if(!task){
-      // شريحة بلا سؤال: نعرض حالة اتصال الأجهزة فقط
-      $('#lvQ').innerHTML='👀 لا يوجد سؤال للأجهزة في هذه الشريحة — تعرض الآيبادات «تابعي الشاشة».';
+    if(!task || kind==='lab'){
+      // شريحة بلا سؤال (أو مختبر على الأجهزة): نعرض حالة اتصال الأجهزة فقط
+      if(kind==='lab') $('.lv-actions').style.display='none';
+      $('#lvQ').innerHTML = kind==='lab' ? '🧪 المجموعات تجرّب المختبر على أجهزتها الآن (زر «ابدئي المختبر» على الآيباد).'
+        : '👀 لا يوجد سؤال للأجهزة في هذه الشريحة — تعرض الآيبادات «تابعي الشاشة».';
       $('#lvDist').innerHTML='';
       const c=T.filter((_,k)=>presence[k]).length;
       $('#lvCount').textContent=`📱 ${c}/${T.length}`; $('#lvCount').classList.toggle('full',c===T.length);
@@ -2061,7 +2064,7 @@ const Live = (() => {
   function showJoin(id){
     const jc=$('#joinCode'); if(!jc) return;
     jc.hidden=false; $('b',jc).textContent=id;
-    const url=new URL('student.html?room='+encodeURIComponent(id), location.href).href;
+    const url=new URL('student.html', location.href).href;
     try{ const q=qrcode(0,'M'); q.addData(url); q.make(); $('.jc-qr',jc).innerHTML=q.createSvgTag({ cellSize:4, margin:0, scalable:true }); }catch(e){}
   }
 

@@ -59,14 +59,15 @@ const LIVE = (() => {
       case 'tf':         return { kind:'tf', q:'صح أم خطأ؟', items:s.items.map(x=>({ t:x.t, a:x.a, why:x.fix || '' })) };
       case 'definition': return { kind:'blanks', q:'أكملي تعريف الذكاء الاصطناعي:',
                                   text:s.parts.map(p=>typeof p==='string'?p:`[${p.w}]`).join(' '), words:s.parts.filter(p=>typeof p!=='string').map(p=>p.w) };
-      case 'brainstorm': return { kind:'ideas', q:s.question };
-      case 'video':      return { kind:'texts', q:'👀 شاهدي الفيديو، ثم أجيبي:', items:s.watch.map(q=>({ label:'', q })) };
-      case 'tps':        return { kind:'text', q:s.question };
+      case 'rpslab':     return { kind:'lab', q:'🧪 جرّبن المختبر على الآيباد: علّمن الآلة حركات حجر ورقة مقص، ثم العبن ضدها!', file:s.file };
+      case 'brainstorm': return { kind:'ideas', q:s.question, model:'أفكار أخرى: '+s.ideas.join(' • ') };
+      case 'video':      return { kind:'texts', q:'👀 شاهدي الفيديو، ثم أجيبي:', items:s.watch.map((q,i)=>({ label:'', q, a:(s.answers||[])[i] })) };
+      case 'tps':        return { kind:'text', q:s.question, model:'لا توجد إجابة واحدة صحيحة 💜 المهم أن تدعمي رأيكِ بسبب.<br>رأي الكتاب: للروبوتات تأثيرات <b>إيجابية</b> (المهام الخطرة، الدقة، تقليل التكلفة) و<b>سلبية</b> (البطالة، التكلفة العالية) — نراها في الشريحة التالية.' };
       case 'drone':      return { kind:'text', q:s.question, model:'أربع مراوح (مروحية رباعية) ترفع الطائرة وتوجّهها وتحافظ على توازنها في الجو.' };
       case 'groups':     return { kind:'text', q:strip(s.task), perTeam:s.groups.map(g=>`${g.i} المجال <b>${g.t}</b>: اذكرن استخدامًا للطائرة المسيّرة فيه + مشكلة أمن أو خصوصية قد تنشأ عنه.`),
                                   model:s.groups.map(g=>`${g.i} <b>${g.t}:</b> ${g.a}`).join('<br>') };
       case 'hots':       return { kind:'texts', q:s.scenario, items:s.questions.map(x=>({ label:x.level, q:x.q, a:x.a })) };
-      case 'exit':       return { kind:'texts', q:'🎫 تذكرة الخروج (3 – 2 – 1):', items:s.cards.map(c=>({ label:'', q:`<b>${c.n}</b> ${c.t}` })) };
+      case 'exit':       return { kind:'texts', model:'💬 لا توجد إجابة واحدة صحيحة — شاركن إجاباتكنّ مع الصف، والمعلمة تجيب عن أسئلتكنّ 💜', q:'🎫 تذكرة الخروج (3 – 2 – 1):', items:s.cards.map(c=>({ label:'', q:`<b>${c.n}</b> ${c.t}` })) };
       case 'closing':    return { kind:'rate', q:'كيف تقيّمين فهمكِ للدرس؟',
                                   items:[{ e:'😀', m:'فهمتُ تمامًا 🌟' }, { e:'🙂', m:'أحتاج قليلًا من المراجعة' }, { e:'🤔', m:'أحتاج مساعدة من المعلمة' }] };
     }

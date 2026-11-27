@@ -41,7 +41,7 @@ p{color:var(--muted);font-weight:800;font-size:19px}
 <script>
   // رابط مختصر للطالبات: index.html?room=101 يفتح صفحة الآيباد على فصل المعلمة مباشرة
   const room = new URLSearchParams(location.search).get('room');
-  if (room) ['toT','toS'].forEach(id => document.getElementById(id).href += '?room=' + encodeURIComponent(room));
+  if (room) document.getElementById('toT').href += '?room=' + encodeURIComponent(room);
 </script>
 </body>
 </html>
