@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الذكاء الاصطناعي | الدخول</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--p2:#8B5CF6;--pd:#5B21B6;--pdd:#2E1065;--ps:#EDE9FE;--line:#E4DCFB;--pink:#EC4899;--muted:#6B5A8E;--font:'Cairo','Segoe UI',Tahoma,Arial,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;display:grid;place-items:center;padding:24px 16px;font-family:var(--font);color:var(--pdd);
+  background:radial-gradient(700px 500px at 105% -5%,#E9DDFF 0%,transparent 60%),radial-gradient(600px 450px at -5% 105%,#FDE3F1 0%,transparent 60%),#FBFAFF}
+main{width:100%;max-width:760px;text-align:center}
+.ic{font-size:84px}
+h1{font-size:clamp(30px,6vw,46px);font-weight:900;margin:6px 0}
+p{color:var(--muted);font-weight:800;font-size:19px}
+.go{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:30px}
+.go a{display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;color:#fff;border-radius:28px;padding:28px 16px;
+  font-size:26px;font-weight:900;box-shadow:0 18px 40px -18px rgba(76,29,149,.55);transition:transform .15s}
+
+.go a:active{transform:scale(.97)}
+.go a span{font-size:56px}
+.go a small{font-size:16px;font-weight:700;opacity:.9}
+.t{background:linear-gradient(135deg,var(--p2),var(--pd))}
+.s{background:linear-gradient(135deg,#F472B6,#DB2777)}
+@media (max-width:560px){.go{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+  <div class="ic">🤖</div>
+  <h1>الذكاء الاصطناعي</h1>
+  <p>أ. هيام الزهراني • عرض تفاعلي مباشر — اختاري طريقة الدخول</p>
+  <div class="go">
+    <a class="t" id="toT" href="teacher.html"><span>👩‍🏫</span>المعلمة<small>عرض الدرس على الشاشة</small></a>
+    <a class="s" id="toS" href="student.html"><span>📱</span>المجموعات<small>صفحة الآيباد</small></a>
+  </div>
+</main>
+<script>
+  // رابط مختصر للطالبات: index.html?room=101 يفتح صفحة الآيباد على فصل المعلمة مباشرة
+  const room = new URLSearchParams(location.search).get('room');
+  if (room) ['toT','toS'].forEach(id => document.getElementById(id).href += '?room=' + encodeURIComponent(room));
+</script>
+</body>
+</html>
